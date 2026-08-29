@@ -1,0 +1,26 @@
+lead_id,age,education,occupation,city,course_enquiry,lead_source,website_visits,course_page_views,pricing_page_views,brochure_downloaded,email_opens,email_clicks,whatsapp_responses,calls_answered,followup_count,webinar_attended,demo_attended,video_watches,days_since_last_activity,purchased_within_30_days,purchased_course
+100001,27,Diploma,Student,Delhi,Finance,Referral,4,1,2.0,0,0,0,1,1,1,0,0,1,17.2,0,No Purchase
+100002,20,Bachelor,Student,Bengaluru,Business Analytics,Google,5,3,2.0,0,6,0,1,1,2,0,0,2,9.9,0,No Purchase
+100003,29,Diploma,Student,Bengaluru,Accounting,Google,13,6,3.0,0,5,4,4,4,5,0,0,5,4.6,1,Accounting
+100004,30,Bachelor,Student,Hyderabad,Data Science,Google,3,5,0.0,0,2,1,1,0,0,0,0,2,37.0,0,No Purchase
+100005,18,Bachelor,Working Professional,Kolkata,Data Science,Referral,3,0,,0,0,0,1,0,1,0,0,3,4.0,0,No Purchase
+100006,18,Master,Job Seeker,Pune,Business Analytics,LinkedIn,4,4,2.0,0,4,1,0,0,2,0,0,3,12.3,1,Business Analytics
+100007,26,Bachelor,Student,Kolkata,Data Science,Google,8,2,1.0,1,1,0,0,1,2,0,0,2,21.4,0,No Purchase
+100008,23,Bachelor,Working Professional,Delhi,Accounting,Facebook,10,7,,1,7,2,2,1,3,0,0,5,7.6,1,Accounting
+100009,25,Bachelor,Student,Bengaluru,Data Science,LinkedIn,7,5,1.0,0,8,4,1,1,3,0,0,2,30.7,0,No Purchase
+100010,21,Diploma,Student,Other,Finance,Organic,8,3,3.0,0,7,2,4,2,5,0,0,4,4.2,0,No Purchase
+100011,29,Bachelor,Student,Hyderabad,Finance,Facebook,4,1,2.0,0,3,2,2,2,1,0,0,3,9.4,0,No Purchase
+100012,29,Bachelor,Working Professional,Mumbai,Business Analytics,Organic,7,1,0.0,0,2,1,0,0,2,0,0,1,32.2,0,No Purchase
+100013,25,Bachelor,Working Professional,Other,Accounting,Google,11,7,3.0,0,6,2,4,1,3,1,0,3,62.8,0,No Purchase
+100014,31,Master,Working Professional,Bengaluru,Data Science,Organic,7,4,1.0,0,4,1,1,3,1,0,0,3,25.7,0,No Purchase
+100015,27,High School,Job Seeker,Hyderabad,Accounting,Organic,9,5,2.0,0,5,1,2,1,4,0,0,5,12.1,1,Accounting
+100016,21,Diploma,Student,Mumbai,Data Science,Referral,5,3,1.0,1,3,3,0,0,2,0,0,1,1.9,0,No Purchase
+100017,27,High School,Working Professional,Chennai,Business Analytics,Google,11,4,3.0,1,4,4,4,1,3,0,0,3,4.9,1,Business Analytics
+100018,20,High School,Working Professional,Mumbai,Finance,Instagram,9,5,1.0,0,4,1,3,1,2,0,0,3,4.2,1,Finance
+100019,29,Bachelor,Student,Pune,Business Analytics,Google,9,3,1.0,0,4,1,1,1,3,0,0,4,25.4,1,Business Analytics
+100020,25,Master,Student,Kolkata,Digital Marketing,Google,12,4,2.0,0,5,1,2,2,3,0,0,2,14.1,0,No Purchase
+100021,24,Bachelor,Student,,Data Science,LinkedIn,8,5,4.0,0,4,0,2,0,2,0,0,2,8.9,1,Data Science
+100022,22,Bachelor,Student,Delhi,Business Analytics,Google,1,0,0.0,0,3,0,0,0,0,0,0,0,15.9,0,No Purchase
+100023,31,Bachelor,Student,Delhi,Business Analytics,Google,10,4,1.0,0,4,1,2,3,2,0,1,5,9.9,0,No Purchase
+100024,24,Bachelor,Student,Lucknow,Digital Marketing,Organic,12,6,5.0,1,9,4,3,1,4,0,0,3,9.7,1,Digital Marketing
+100025,23,Bachelor,Self Employed,Jaipur,Finance,Instagram,7,4,1.0,0,4,1,2,0,1,0,0,2,20.1,0,No Purchase

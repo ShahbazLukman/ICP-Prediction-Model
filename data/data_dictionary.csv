@@ -1,0 +1,23 @@
+column,type,description
+lead_id,ID,Unique synthetic lead identifier
+age,Numeric,Lead age
+education,Categorical,Highest education level
+occupation,Categorical,Occupation category
+city,Categorical,City category
+course_enquiry,Categorical,Course the lead initially enquired about
+lead_source,Categorical,Marketing/acquisition source
+website_visits,Numeric,Number of website visits
+course_page_views,Numeric,Course page views
+pricing_page_views,Numeric,Pricing page views
+brochure_downloaded,Binary,Whether a brochure was downloaded
+email_opens,Numeric,Number of marketing emails opened
+email_clicks,Numeric,Number of email links clicked
+whatsapp_responses,Numeric,Number of WhatsApp responses
+calls_answered,Numeric,Calls answered
+followup_count,Numeric,Sales follow-ups
+webinar_attended,Binary,Whether a webinar was attended
+demo_attended,Binary,Whether a demo was attended
+video_watches,Numeric,Number of course videos watched
+days_since_last_activity,Numeric,Days since the lead's latest activity
+purchased_within_30_days,Target,"1 if purchase occurred within 30 days, else 0"
+purchased_course,Post-outcome,Course purchased for purchasers; must not be used as a predictor
