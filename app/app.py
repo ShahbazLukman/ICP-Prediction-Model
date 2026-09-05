@@ -321,10 +321,6 @@ components.html(
 
 if "page" not in st.session_state:
     st.session_state.page = "Dashboard"
-if "analyzer_step" not in st.session_state:
-    st.session_state.analyzer_step = 1
-if "analysis_result" not in st.session_state:
-    st.session_state.analysis_result = None
 if "batch" not in st.session_state:
     st.session_state.batch = None
 
@@ -359,38 +355,8 @@ def action_for(cat):
     }[cat]
 
 
-def model_result_to_ui(result):
-    score = float(result["lead_score"])
-    cat = category(score)
-    return {**result, "lead_score": score, "purchase_probability": float(result["purchase_probability"]), "lead_category": cat}
 
 
-def score_breakdown(lead, score):
-    """Heuristic presentation breakdown; it is not model feature attribution."""
-    demographic = 50
-    demographic += 8 if lead["education"] in ["Bachelor", "Master"] else 0
-    demographic += 5 if lead["occupation"] == "Working Professional" else 0
-    demographic = min(100, demographic)
-
-    engagement = min(100, (
-        lead["website_visits"] * 1.6 + lead["course_page_views"] * 2.2 +
-        lead["email_clicks"] * 5 + lead["whatsapp_responses"] * 5 +
-        lead["video_watches"] * 2 + lead["demo_attended"] * 15
-    ))
-
-    intent = min(100, (
-        lead["pricing_page_views"] * 8 + lead["brochure_downloaded"] * 18 +
-        lead["demo_attended"] * 20 + lead["webinar_attended"] * 10 +
-        lead["followup_count"] * 3
-    ))
-
-    recency = max(0, 100 - float(lead["days_since_last_activity"]) * 4)
-    return {
-        "Demographic Fit": round(demographic),
-        "Engagement Level": round(engagement),
-        "Purchase Intent": round(intent),
-        "Activity Recency": round(recency),
-    }
 
 
 def render_metric_cards(metrics):
@@ -429,20 +395,6 @@ def lead_from_state():
     }
 
 
-def init_form_state():
-    defaults = {
-        "age": 24, "education": "Bachelor", "occupation": "Student", "city": "Delhi",
-        "course": "Data Science", "source": "Google", "website_visits": 8,
-        "course_page_views": 5, "pricing_page_views": 2, "video_watches": 3,
-        "days_since_last_activity": 3.0, "email_opens": 4, "email_clicks": 2,
-        "whatsapp_responses": 2, "calls_answered": 1, "followup_count": 2,
-        "brochure": True, "webinar": False, "demo": False,
-    }
-    for key, value in defaults.items():
-        st.session_state.setdefault(key, value)
-
-
-init_form_state()
 
 
 # ============================================================
@@ -466,7 +418,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.caption("INTELLIGENCE")
-    nav_items = ["Dashboard", "ICP Analyzer", "Batch Analysis", "Analytics", "Data Guide", "Settings"]
+    nav_items = ["Dashboard", "Batch Analysis", "Analytics", "Data Guide"]
     for item in nav_items:
         if st.button(item, key=f"nav_{item}", use_container_width=True):
             st.session_state.page = item
@@ -476,7 +428,7 @@ with st.sidebar:
 
 
 # Mobile-style compact navigation at bottom. Streamlit's sidebar remains available as a drawer.
-if st.session_state.page in ["Dashboard", "ICP Analyzer", "Batch Analysis", "Analytics"]:
+if st.session_state.page in ["Dashboard", "Batch Analysis", "Analytics"]:
     st.markdown("<div class='mobile-only'><div class='small-muted'>Quick navigation</div></div>", unsafe_allow_html=True)
 
 
@@ -489,9 +441,8 @@ with h1:
     st.markdown("<div class='eyebrow'>AI-POWERED CUSTOMER INTELLIGENCE</div>", unsafe_allow_html=True)
     st.markdown(f"<div style='font-family:Manrope;font-size:28px;font-weight:800;margin-top:5px'>{st.session_state.page}</div>", unsafe_allow_html=True)
 with h2:
-    if st.button("＋ Analyze New Lead", type="primary", use_container_width=True):
-        st.session_state.page = "ICP Analyzer"
-        st.session_state.analyzer_step = 1
+    if st.button("＋ Upload Leads", type="primary", use_container_width=True):
+        st.session_state.page = "Batch Analysis"
         st.rerun()
 
 
@@ -554,157 +505,12 @@ def render_dashboard():
             display_cols = [c for c in ["age", "city", "course_enquiry", "lead_source", "purchase_probability", "lead_category"] if c in top.columns]
             st.dataframe(top[display_cols], use_container_width=True, hide_index=True)
         else:
-            st.info("No scored leads yet. Start with Analyze New Lead or Upload Leads.")
+            st.info("No scored leads yet. Upload a dataset to get started.")
         st.markdown('</div>', unsafe_allow_html=True)
     with c2:
         st.markdown('<div class="insight"><div class="eyebrow">QUICK AI INSIGHT</div><div class="card-title" style="margin-top:8px">Build your ICP from real behaviour.</div><p style="color:#94A3B8;font-size:13px;line-height:1.6">The strongest operational signals in this project come from observed engagement and recency. Use scores to prioritize action, then use the explanation panels to understand why.</p></div>', unsafe_allow_html=True)
 
 
-# ============================================================
-# ICP ANALYZER
-# ============================================================
-
-
-def render_stepper(step):
-    names = ["Customer Profile", "Digital Behaviour", "Engagement", "Analyze"]
-    html = '<div class="stepper">'
-    for i, name in enumerate(names, 1):
-        cls = "active" if i == step else ("done" if i < step else "")
-        html += f'<div class="step {cls}"><div class="step-num">0{i}</div><div class="step-name">{name}</div></div>'
-    html += '</div>'
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def render_analyzer():
-    step = st.session_state.analyzer_step
-    st.markdown("<div class='eyebrow'>ICP ANALYZER</div><h2 style='margin-top:5px'>Analyze a customer profile</h2><p style='color:#94A3B8'>Move through four focused steps. Your existing ML model remains the decision engine.</p>", unsafe_allow_html=True)
-    render_stepper(step)
-
-    if step == 1:
-        st.markdown('<div class="card"><div class="card-title">01 · Customer Profile</div><div class="card-sub">Tell us who the customer is and how they arrived.</div>', unsafe_allow_html=True)
-        c1, c2, c3 = st.columns(3)
-        with c1: st.number_input("Age", 18, 70, key="age")
-        with c2: st.selectbox("Education", ["High School", "Diploma", "Bachelor", "Master"], key="education")
-        with c3: st.selectbox("Occupation", ["Student", "Working Professional", "Job Seeker", "Self Employed"], key="occupation")
-        c1, c2, c3 = st.columns(3)
-        with c1: st.selectbox("City", ["Delhi", "Mumbai", "Bengaluru", "Hyderabad", "Pune", "Chennai", "Kolkata", "Lucknow", "Jaipur", "Other"], key="city")
-        with c2: st.selectbox("Course Enquiry", ["Data Science", "Finance", "Accounting", "Digital Marketing", "Business Analytics"], key="course")
-        with c3: st.selectbox("Lead Source", ["Google", "Instagram", "Facebook", "Referral", "Organic", "LinkedIn"], key="source")
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.write("")
-        if st.button("Continue to Digital Behaviour →", type="primary", use_container_width=True):
-            st.session_state.analyzer_step = 2
-            st.rerun()
-
-    elif step == 2:
-        st.markdown('<div class="card"><div class="card-title">02 · Digital Behaviour</div><div class="card-sub">Measure the signals that show active research and interest.</div>', unsafe_allow_html=True)
-        c1, c2 = st.columns(2)
-        with c1:
-            st.number_input("Website Visits", 0, 100, key="website_visits")
-            st.number_input("Course Page Views", 0, 100, key="course_page_views")
-            st.number_input("Pricing Page Views", 0, 50, key="pricing_page_views")
-        with c2:
-            st.number_input("Video Watches", 0, 50, key="video_watches")
-            st.slider("Days Since Last Activity", 0.0, 180.0, key="days_since_last_activity")
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.write("")
-        a, b = st.columns(2)
-        with a:
-            if st.button("← Back", use_container_width=True): st.session_state.analyzer_step = 1; st.rerun()
-        with b:
-            if st.button("Continue to Engagement →", type="primary", use_container_width=True): st.session_state.analyzer_step = 3; st.rerun()
-
-    elif step == 3:
-        st.markdown('<div class="card"><div class="card-title">03 · Engagement</div><div class="card-sub">Capture communication depth and high-intent interactions.</div>', unsafe_allow_html=True)
-        c1, c2, c3 = st.columns(3)
-        with c1: st.number_input("Email Opens", 0, 100, key="email_opens")
-        with c2: st.number_input("Email Clicks", 0, 50, key="email_clicks")
-        with c3: st.number_input("WhatsApp Responses", 0, 50, key="whatsapp_responses")
-        c1, c2 = st.columns(2)
-        with c1: st.number_input("Calls Answered", 0, 20, key="calls_answered")
-        with c2: st.number_input("Follow-up Count", 0, 30, key="followup_count")
-        st.write("")
-        t1, t2, t3 = st.columns(3)
-        with t1:
-            st.markdown('<div class="toggle-card"><b>Brochure Downloaded</b><div class="small-muted">High-intent content signal</div>', unsafe_allow_html=True)
-            st.toggle("Enable", key="brochure", label_visibility="collapsed")
-            st.markdown('</div>', unsafe_allow_html=True)
-        with t2:
-            st.markdown('<div class="toggle-card"><b>Webinar Attended</b><div class="small-muted">Live learning interaction</div>', unsafe_allow_html=True)
-            st.toggle("Enable", key="webinar", label_visibility="collapsed")
-            st.markdown('</div>', unsafe_allow_html=True)
-        with t3:
-            st.markdown('<div class="toggle-card"><b>Demo Attended</b><div class="small-muted">Direct product/course interaction</div>', unsafe_allow_html=True)
-            st.toggle("Enable", key="demo", label_visibility="collapsed")
-            st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.write("")
-        a, b = st.columns(2)
-        with a:
-            if st.button("← Back", use_container_width=True): st.session_state.analyzer_step = 2; st.rerun()
-        with b:
-            if st.button("Review & Analyze →", type="primary", use_container_width=True): st.session_state.analyzer_step = 4; st.rerun()
-
-    else:
-        lead = lead_from_state()
-        st.markdown('<div class="card"><div class="card-title">04 · Analyze</div><div class="card-sub">Review the submitted profile before running the model.</div>', unsafe_allow_html=True)
-        summary = pd.DataFrame([lead]).T.reset_index()
-        summary.columns = ["Signal", "Value"]
-        st.dataframe(summary, use_container_width=True, hide_index=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.write("")
-        a, b = st.columns(2)
-        with a:
-            if st.button("← Back", use_container_width=True): st.session_state.analyzer_step = 3; st.rerun()
-        with b:
-            if st.button("✦ Analyze ICP Match", type="primary", use_container_width=True):
-                with st.spinner("Analyzing customer signals…"):
-                    st.session_state.analysis_result = model_result_to_ui(predict_lead(lead))
-                    st.session_state.analysis_lead = lead
-                st.session_state.page = "ICP Results"
-                st.rerun()
-
-
-# ============================================================
-# RESULTS
-# ============================================================
-
-
-def render_results():
-    result = st.session_state.analysis_result
-    lead = st.session_state.get("analysis_lead")
-    if not result:
-        st.info("No analysis yet. Start with the ICP Analyzer.")
-        if st.button("Open ICP Analyzer", type="primary"): st.session_state.page = "ICP Analyzer"; st.rerun()
-        return
-
-    score = result["lead_score"]
-    prob = result["purchase_probability"]
-    cat = result["lead_category"]
-    breakdown = score_breakdown(lead, score)
-
-    st.markdown("<div class='eyebrow'>ICP RESULTS</div><h2 style='margin-top:5px'>Your customer intelligence report</h2>", unsafe_allow_html=True)
-    st.markdown(
-        f'''<div class="hero"><div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
-        <div><div class="eyebrow">ICP MATCH</div><div class="hero-title">{cat} potential customer</div>
-        <div class="hero-copy">Predicted purchase probability is <b style="color:#F8FAFC">{prob:.1f}%</b>. Use this score to prioritize the next sales or marketing action.</div><div style="margin-top:16px">{badge_html(cat)}</div></div>
-        <div class="score-ring" style="background:radial-gradient(circle,#111827 57%,transparent 58%),conic-gradient(#6C63FF {score*3.6}deg,#243047 {score*3.6}deg 360deg)"><div class="score-number">{score:.0f}</div><div class="score-label">ICP SCORE / 100</div></div>
-        </div></div>''', unsafe_allow_html=True)
-
-    st.write("")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown('<div class="card"><div class="card-title">ICP Score Breakdown</div><div class="card-sub">Directional signal groups for explanation; not formal feature attribution.</div>', unsafe_allow_html=True)
-        for name, value in breakdown.items():
-            st.markdown(f"<div style='display:flex;justify-content:space-between;margin:15px 0 7px;font-size:12px'><span>{name}</span><span style='color:#94A3B8'>{value}%</span></div>", unsafe_allow_html=True)
-            st.progress(value / 100)
-        st.markdown('</div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown(f'''<div class="insight"><div class="eyebrow">AI INSIGHT</div><div class="card-title" style="margin-top:8px">Why this lead stands out</div><p style="color:#CBD5E1;font-size:13px;line-height:1.7">Strong purchase-intent signals can include pricing-page activity, brochure downloads, demo participation, repeated engagement, and recent activity. Review the signal groups alongside the model probability before acting.</p></div><div style="height:14px"></div><div class="recommendation"><div class="eyebrow">RECOMMENDED ACTION</div><div class="card-title" style="margin-top:7px">{action_for(cat)}</div><div class="small-muted" style="margin-top:6px">Recommended from the lead category threshold.</div></div>''', unsafe_allow_html=True)
-
-    st.write("")
-    if st.button("← Analyze Another Lead", type="primary", use_container_width=True):
-        st.session_state.page = "ICP Analyzer"; st.session_state.analyzer_step = 1; st.rerun()
 
 
 # ============================================================
@@ -880,28 +686,12 @@ def render_data_guide():
 
 
 # ============================================================
-# SETTINGS
-# ============================================================
-
-
-def render_settings():
-    st.markdown("<div class='eyebrow'>SETTINGS</div><h2 style='margin-top:5px'>Workspace settings</h2>", unsafe_allow_html=True)
-    st.markdown('<div class="card"><div class="card-title">Model information</div><div class="card-sub">ICP Insight AI uses the existing purchase prediction pipeline connected to this Streamlit application.</div><br><span class="badge badge-medium">MODEL ONLINE</span></div>', unsafe_allow_html=True)
-    st.write("")
-    st.markdown('<div class="card"><div class="card-title">Product principles</div><p style="color:#94A3B8;line-height:1.7;font-size:13px">Input → Analyze → Result → Explain → Act. Scores indicate predicted purchase likelihood and should support—not replace—sales judgment.</p></div>', unsafe_allow_html=True)
-
-
-# ============================================================
 # ROUTER
 # ============================================================
 
 page = st.session_state.page
 if page == "Dashboard":
     render_dashboard()
-elif page == "ICP Analyzer":
-    render_analyzer()
-elif page == "ICP Results":
-    render_results()
 elif page == "Batch Analysis":
     render_batch()
 elif page == "Batch Results":
@@ -910,8 +700,6 @@ elif page == "Analytics":
     render_analytics()
 elif page == "Data Guide":
     render_data_guide()
-elif page == "Settings":
-    render_settings()
 
 
 # ============================================================
